@@ -3,7 +3,7 @@ import {
   meTalking,
   hp,
   mp,
-} from '../images'
+} from '../images/index'
 
 export default {
   'meGrp': {

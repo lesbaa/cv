@@ -25,7 +25,7 @@ import lesIcon from './lesIcon'
 import elloIcon from './elloIcon'
 import githubIcon from './githubIcon'
 
-export default {
+export {
   tapeLoader,
   meSilent,
   meTalking,
