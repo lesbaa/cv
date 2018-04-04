@@ -7,6 +7,7 @@ import overviewSkills from './assets/overviewSkills'
 import slides from './assets/slides'
 import styles from './assets/styles'
 import suchStuff from './assets/suchStuff'
+import parseJsonToMarkup from './modules/parseJsonToMarkup'
 // begin cv constructor
 
 export default class CV {
@@ -20,7 +21,6 @@ export default class CV {
     // TODO tidy this the fuck up. al ot of these can be abstraced out into helper funcs
     document.body.style.opacity = '0'
 
-    window.body = document.body,
     window.winHeight = window.innerHeight,
     window.winWidth = window.innerWidth,
 
@@ -64,7 +64,7 @@ export default class CV {
     },
     // and this
 
-    window.createEl = function (parent, type, id, classes, content, pushToArray, arrayName) {
+    window.createEl = (parent, type, id, classes, content, pushToArray, arrayName) => {
       // createElement helper function.
       var el = document.createElement(type)
 
@@ -110,9 +110,9 @@ export default class CV {
     createEl(document.head, 'style', null, null, this.styles)
     createEl(document.head, 'title')
 
-    this.parseJsonToMarkup(this.markup.nextPrev, body)
-    this.parseJsonToMarkup(this.markup.loading, body)
-    createEl(body, 'section', null, 'blank-wrapper')
+    parseJsonToMarkup(this.markup.nextPrev, document.body)
+    parseJsonToMarkup(this.markup.loading, document.body)
+    createEl(document.body, 'section', null, 'blank-wrapper')
 
     getEID('next').addEventListener('click', () => {
       this.slideTo(this.slides.slideNames[this.slides.currentSlide + 1])
@@ -122,20 +122,20 @@ export default class CV {
       this.slideTo(this.slides.slideNames[this.slides.currentSlide - 1])
     })
 
-    var hash = location.hash.split('#')[1], initSlide
+    const hash = location.hash.split('#')[1]
 
     // so this it loads from window location, if null then load intro slide
-    initSlide = (location.hash) ? ((this.slides.slideNames.indexOf(hash) == -1) ? 'woops' : hash) : 'intro'
+    const initSlide = hash ? ((slides.slideNames.indexOf(hash) == -1) ? 'woops' : hash) : 'intro'
 
     // reveal body, sounds pervy.
 
     // once window has loaded, reveal body (sounds pervy), wait 500ms then slideTo first slide.
     // change to promises / loading etc
     window.addEventListener('load', () => {
-      body.style.opacity = '1'
+      document.body.style.opacity = '1'
       setTimeout(() => {
         this.slideTo(initSlide)
-      }, 1000)
+      }, 500)
     })
 
     // so this navigation in the broswer calls the slideTo function w/animation rather than jumpy 
@@ -276,11 +276,11 @@ export default class CV {
     if (!slide) { slide = 'intro' }
 
     // there will only be one section present on the page at a time so..
-    var thisSection = document.querySelector('section'),
-      loading = getEID('loading'),
+    let thisSection = document.querySelector('section')
+    const loading = getEID('loading')
 
-      // if we're going forwards then add out-of-view-left class else out-of-view-right class
-      directionClass = (this.slides.slideNames.indexOf(slide) - this.slides.currentSlide > 0) ? 'out-of-view-left' : 'out-of-view-right'
+    // if we're going forwards then add out-of-view-left class else out-of-view-right class
+    const directionClass = (this.slides.slideNames.indexOf(slide) - this.slides.currentSlide > 0) ? 'out-of-view-left' : 'out-of-view-right'
 
     // set current slide to index of the slide with this name
     this.slides.currentSlide = this.slides.slideNames.indexOf(slide)
@@ -288,8 +288,6 @@ export default class CV {
     // change title and hash
     document.querySelector('title').textContent = this.slides.titles[slide]
     location.hash = slide
-
-
 
     if (!thisSection.classList.contains(directionClass)) {
       thisSection.classList.add(directionClass)
@@ -301,11 +299,14 @@ export default class CV {
     // this could all probably be done more elegantly done with web anim API and / or ES5 promises but...
     // I don't have the time at the mo.  Will refactor to include this.
     setTimeout(() => {
-      document.body.removeChild(thisSection)
+      console.log(thisSection)
+      if (document.body.contains(thisSection)) {
+        document.body.removeChild(thisSection)
+      }
       setTimeout(() => {
         loading.classList.add('not-loading')
       }, 1000)
-      this.parseJsonToMarkup(this.markup[slide], document.body)
+      parseJsonToMarkup(this.markup[slide], document.body)
       thisSection = document.querySelector('section')
 
       this.tasks[slide].call(this)
@@ -403,7 +404,7 @@ export default class CV {
       setTimeout(function () {
         getEBC('hp-mp-image').forEach(function (elem, ind) {
           // energy level is the width as a number primitive, get width, remove 'px' and parse to number
-          var energyLevel = parseInt(hpMp[ind].style.width.split('px')[0])
+          var energyLevel = parseInt(elem.style.width.split('px')[0])
           // if each bar is past a certain amount, remove the blink class w/animation
           if (energyLevel > 64) {
             elem.classList.remove('blink')
@@ -421,7 +422,7 @@ export default class CV {
   typeTextAndTalk = function (text, el, start, img, fast) {
     // doc please!!
     if (!img) {
-      createEl(body, 'span', 'img-ting', '', '')
+      createEl(document.body, 'span', 'img-ting', '', '')
       img = getEID('img-ting') // create blank span if there's no image.
     }
     var imgSwap = (img.getAttribute('data-swap-img')) ? img.getAttribute('data-swap-img') : img.getAttribute('src'), // get image url to swap to from swap-img attr, in this case gif of me talking.
@@ -630,53 +631,6 @@ export default class CV {
       }
     })
   } // end my console
-
-  // TODO this can be a helper func on it's todd
-  parseJsonToMarkup = function (jsonInput, parentElement) {
-    // function to take json page data stored and insert it as html into the DOM
-    for (var entry in jsonInput) {
-      // for every 1st level item in the json object
-      var input = jsonInput[entry]
-
-      var element = document.createElement(input.type)
-
-      if (input.textContent) {
-        var text = document.createTextNode(input.textContent)
-        element.appendChild(text)
-      }
-
-      // if classes exist then add classes
-
-      if (input.classes) {
-        element.setAttribute('class', input.classes)
-      }
-
-      // if there's an id add it
-
-      if (input.id) {
-        element.id = input.id
-      }
-
-      // if there are any custom attributes, add them
-
-      if (input.attributes) {
-        for (var attr in input.attributes) {
-          element.setAttribute(attr, input.attributes[attr])
-        }
-      }
-
-      // if there's any child nodes, recursively call the function with this branch and element
-      // and append the element or just append the element.
-
-      if (input.children) {
-        this.parseJsonToMarkup(input.children, element)
-        parentElement.appendChild(element)
-      } else {
-        parentElement.appendChild(element)
-      }
-
-    }
-  } // end parse json to markup
 
   // TODO turn this into a class or make it functional
   phoneStuff = function (cvImages) {
