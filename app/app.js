@@ -1,3 +1,4 @@
+import './modules/featureFills'
 import images from './assets/images'
 import blurbs from './assets/blurbs'
 import markupComponents from './assets/markup/markupComponents'
@@ -8,111 +9,67 @@ import slides from './assets/slides'
 import styles from './assets/styles'
 import suchStuff from './assets/suchStuff'
 import parseJsonToMarkup from './modules/parseJsonToMarkup'
+import {
+  createElement,
+  getEBC,
+  getEID,
+  setPos,
+} from './modules/helpers'
+import typeTextAndTalk from './modules/typer'
+
 // begin cv constructor
 
+
+const winHeight = window.innerHeight
+const winWidth = window.innerWidth
+
 export default class CV {
-  constructor(whoIsCalling) {
+  // TODO these could maybe be functions
+  cvImages = images
+  overviewSkills = overviewSkills
+  slides = slides
+  blurbs = blurbs
+  markupComponents = markupComponents
+  markup = markup
+  devSkills = devSkills
+  suchStuffStuff = suchStuff
+  styles = styles
+  currentSlide = 0
+  state = {
+        
+  }
+
+  init(whoIsCalling) {
 
     // helper functions
 
     // Utils Stuff
 
     // hide body before styles load
-    // TODO tidy this the fuck up. al ot of these can be abstraced out into helper funcs
     document.body.style.opacity = '0'
 
-    window.winHeight = window.innerHeight,
-    window.winWidth = window.innerWidth,
-
-    // Shortened getElementByID and getElementsByClass, add to global object 
-    // !!! BAD JUJU !!! SORT THIS OUT LES !!!
-
-    window.getEID = function (ele) {
-      return document.getElementById(ele)
-    },
-
-    window.getEBC = function (className) {
-      return document.getElementsByClassName(className)
-    },
-
-    // forEach method to HTMLCollection and NodeList (returned by getElementById and querySelectorAll) prototypes
-
-    HTMLCollection.prototype.forEach = NodeList.prototype.forEach = [].forEach
-
-    // set el size in one statement
-
-    Element.prototype.setInlineSize = function (width, height) {
-      this.style.height = height
-      this.style.width = width
-    }
-
-    window.setPos = function (xValue, yValue, element) {
-      // sets x and y coords for absolutely positioned elements
-      if (xValue.charAt(0) == '-') {
-        // if minus value set to from the right
-        element.style.right = xValue.substr(1)
-      } else {
-        element.style.left = xValue
-        // if positive, from the left
-      }
-      if (yValue.charAt(0) == '-') {
-        // same idea with y coords
-        element.style.bottom = yValue.substr(1)
-      } else {
-        element.style.top = yValue
-      }
-    },
-    // and this
-
-    window.createEl = (parent, type, id, classes, content, pushToArray, arrayName) => {
-      // createElement helper function.
-      var el = document.createElement(type)
-
-      if (id) {
-        el.id = id // set id
-      }
-
-      if (classes) {
-        el.setAttribute('class', classes || '') // set class(es) if it's defined
-      }
-
-      if (content) { // if it's an image use content for src
-        if (type == 'img') {
-          el.src = content
-        }
-
-        if (type == 'style') { // if it's a style then make a style element.
-          el.setAttribute('type', 'text/css')
-          const text = document.createTextNode(content)
-          el.appendChild(text)
-        }
-
-        else { // otherwise just smoosh it in
-          el.innerHTML = (content || '')
-        }
-
-      } else {
-        el.innerHTML = ''
-      }
-
-      parent.appendChild(el)
-      // push to array for bulk manipulation.
-      if ((pushToArray) && (pushToArray === true)) {
-        if (arrayName) {
-          arrayName.push(el)
-        } // end if arrayName
-      } else {
-        return
-      }
-    } //  end window.createEl
-
     // inject styles into head
-    createEl(document.head, 'style', null, null, this.styles)
-    createEl(document.head, 'title')
+    createElement({
+      parent: document.head, 
+      type: 'style', 
+      id: null, 
+      classes: null, 
+      content: this.styles,
+    })
+
+    createElement({
+      parent: document.head, 
+      type: 'title',
+    })
 
     parseJsonToMarkup(this.markup.nextPrev, document.body)
     parseJsonToMarkup(this.markup.loading, document.body)
-    createEl(document.body, 'section', null, 'blank-wrapper')
+    createElement({
+      parent: document.body, 
+      type: 'section', 
+      id: null, 
+      classes: 'blank-wrapper',
+    })
 
     getEID('next').addEventListener('click', () => {
       this.slideTo(this.slides.slideNames[this.slides.currentSlide + 1])
@@ -126,7 +83,6 @@ export default class CV {
 
     // so this it loads from window location, if null then load intro slide
     const initSlide = hash ? ((slides.slideNames.indexOf(hash) == -1) ? 'woops' : hash) : 'intro'
-
     // reveal body, sounds pervy.
 
     // once window has loaded, reveal body (sounds pervy), wait 500ms then slideTo first slide.
@@ -153,7 +109,7 @@ export default class CV {
 
   me = {
     Name: 'Les Moffat',
-    characterClass: function () {
+    characterClass: () => {
       const rand = Math.round(Math.random() * 2)
       const choices = [
         'Level 19 Renegade Bounty Hunter',
@@ -168,24 +124,18 @@ export default class CV {
     mp: 75,
   }
 
-  // TODO these could maybe be functions
-  cvImages = images
-  overviewSkills = overviewSkills
-  slides = slides
-  blurbs = blurbs
-  markupComponents = markupComponents
-  markup = markup
-  devSkills = devSkills
-  suchStuffStuff = suchStuff
-  styles = styles
-  currentSlide = 0
-
   tasks = {
     intro: () => {
       this.me.mp = 57
       this.me.hp = 53
       setTimeout(() => {
-        this.typeTextAndTalk(this.blurbs.intro, getEID('intro-blurb'), 0, getEID('me-img'), false)
+        typeTextAndTalk({
+          text: this.blurbs.intro,
+          el: getEID('intro-blurb'),
+          startAt: 0,
+          img: getEID('me-img'),
+          fast: false,
+        })
       }, 3000)
       this.removeBlink()
     },
@@ -194,7 +144,13 @@ export default class CV {
       this.me.hp = 57
       this.setCharClass()
       setTimeout(() => {
-        this.typeTextAndTalk(this.blurbs.overview, getEID('overview-blurb'), 0, getEID('me-img'), false)
+        typeTextAndTalk({
+          text: this.blurbs.overview,
+          el: getEID('overview-blurb'),
+          startAt: 0,
+          img: getEID('me-img'),
+          fast: false,
+        })
         this.drawOverviewSkills()
       }, 3000)
       this.removeBlink()
@@ -214,7 +170,13 @@ export default class CV {
       this.me.mp = 79
       this.me.hp = 74
       setTimeout(() => {
-        this.typeTextAndTalk(this.blurbs.layout, getEID('layout-blurb'), 0, getEID('me-img'), false)
+        typeTextAndTalk({
+          text: this.blurbs.layout,
+          el: getEID('layout-blurb'),
+          startAt: 0,
+          img: getEID('me-img'),
+          fast: false,
+        })
       }, 3000)
       this.removeBlink()
       document.getElementById('next-btn').addEventListener('click', () => {
@@ -223,7 +185,13 @@ export default class CV {
     },
     illustration: () => {
       setTimeout(() => {
-        this.typeTextAndTalk(this.blurbs.illus, getEID('illus-blurb'), 0, getEID('me-img'), false)
+        typeTextAndTalk({
+          text: this.blurbs.illus,
+          el: getEID('illus-blurb'),
+          startAt: 0,
+          img: getEID('me-img'),
+          fast: false
+        })
       }, 3000)
     },
     learning: () => {
@@ -233,7 +201,13 @@ export default class CV {
       this.me.mp = 84
       this.me.hp = 86
       setTimeout(() => {
-        this.typeTextAndTalk(this.blurbs.suchStuff, getEID('such-blurb'), 0, getEID('me-img'), false)
+        typeTextAndTalk({
+          text: this.blurbs.suchStuff,
+          el: getEID('such-blurb'),
+          startAt: 0,
+          img: getEID('me-img'),
+          fast: false
+        })
         this.suchStuff()
       }, 3000)
       this.removeBlink()
@@ -242,7 +216,13 @@ export default class CV {
       this.me.mp = 100
       this.me.hp = 100
       setTimeout(() => {
-        this.typeTextAndTalk(this.blurbs.sumUp, getEID('sum-up-blurb'), 0, getEID('me-img'), false)
+        typeTextAndTalk({
+          text: this.blurbs.sumUp,
+          el: getEID('sum-up-blurb'),
+          startAt: 0,
+          img: getEID('me-img'),
+          fast: false
+        })
       }, 2000)
       this.removeBlink()
     },
@@ -256,7 +236,15 @@ export default class CV {
     var i = 1
 
     for (var thing in this.suchStuffStuff) {
-      createEl(getEID('such-stuff-stuff'), 'div', thing.replace(/ /g, '-'), 'such-stuff', thing)
+      
+      createElement({
+        parent: getEID('such-stuff-stuff'),
+        type: 'div',
+        id: thing.replace(/ /g, '-'),
+        classes: 'such-stuff',
+        content: thing,
+      })
+
       var element = getEID(thing.replace(/ /g, '-'))
       setPos(this.suchStuffStuff[thing].x, this.suchStuffStuff[thing].y, element)
       element.style.fontSize = this.suchStuffStuff[thing].fontSize
@@ -264,8 +252,8 @@ export default class CV {
       element.style.webkitTransitionDelay = element.style.transitionDelay = element.style.mozTransitionDelay = element.msTransitionDelay = i * 0.5 + 's'
       i++
     } // for thing in cv.suchStuff
-    setTimeout(function (el, ind) {
-      getEBC('such-stuff').forEach(function (elem, index) {
+    setTimeout((el, ind) => {
+      getEBC('such-stuff').forEach((elem, index) => {
         elem.classList.add('such-expanded')
       })
     }, 1000)
@@ -299,10 +287,7 @@ export default class CV {
     // this could all probably be done more elegantly done with web anim API and / or ES5 promises but...
     // I don't have the time at the mo.  Will refactor to include this.
     setTimeout(() => {
-      console.log(thisSection)
-      if (document.body.contains(thisSection)) {
-        document.body.removeChild(thisSection)
-      }
+      document.body.removeChild(thisSection)
       setTimeout(() => {
         loading.classList.add('not-loading')
       }, 1000)
@@ -330,7 +315,15 @@ export default class CV {
 
     for (var skillValue in this.overviewSkills) {
 
-      createEl(getEID('skills-list'), 'div', undefined, 'overview--skills-list--skill', '', true, skills)
+      createElement({
+        parent: getEID('skills-list'),
+        type: 'div',
+        id: undefined,
+        classes: 'overview--skills-list--skill',
+        content: '',
+        pushToArray: true,
+        arrayName: skills,
+      })
       // create elements and push to skills array
 
       skills[i].setInlineSize(this.overviewSkills[skillValue] / 3 + 'vw', (winHeight / totalSkills) + 1 + 'px')
@@ -342,7 +335,7 @@ export default class CV {
     // add skill name labels to bars.
 
     skills.forEach(
-      function (elem, index) {
+      (elem, index) => {
         var colourSpread = 183 - 78
         var colourOffset = 78
         elem.style.backgroundColor = 'hsl(' + ((colourSpread / totalSkills) * index + colourOffset) + ' ,55% ,49% )'
@@ -364,8 +357,8 @@ export default class CV {
         elem.appendChild(skillText)
       })
 
-    const removeExpanded = function (thisArray) {
-      thisArray.forEach(function (elem, ind) {
+    const removeExpanded = (thisArray) => {
+      thisArray.forEach((elem, ind) => {
         elem.classList.remove('expanded')
         var timer = (thisArray.length >= 10) ? (ind / thisArray.length) + 's' : '0.' + ind + 's'
         elem.style.webkitTransitionDelay = elem.style.transitionDelay = elem.style.mozTransitionDelay = elem.msTransitionDelay = timer
@@ -375,15 +368,15 @@ export default class CV {
     getEID('next').addEventListener('click', removeExpanded(skills))
     getEID('prev').addEventListener('click', removeExpanded(skills))
 
-    var devTimeout = window.setTimeout(function () {
-      skills.forEach(function (elem, index) {
+    var devTimeout = window.setTimeout(() => {
+      skills.forEach((elem, index) => {
         elem.classList.add('expanded')
       })
     }, 100)
 
   }
 
-  removeBlink = function () {
+  removeBlink = () => {
     // the health and mana bars are set to scaleX(0) by default
     // the health and mana icons are set to css 'blink' animation by default
     // this function removes the classes
@@ -399,10 +392,10 @@ export default class CV {
     })
 
     // I could do with removing some of these setTimeouts
-    setTimeout(function () {
+    setTimeout(() => {
       // ANOTHER ONE!! sort this
-      setTimeout(function () {
-        getEBC('hp-mp-image').forEach(function (elem, ind) {
+      setTimeout(() => {
+        getEBC('hp-mp-image').forEach((elem, ind) => {
           // energy level is the width as a number primitive, get width, remove 'px' and parse to number
           var energyLevel = parseInt(elem.style.width.split('px')[0])
           // if each bar is past a certain amount, remove the blink class w/animation
@@ -411,93 +404,58 @@ export default class CV {
           }
         })
       }, 1500)
-      hpMp.forEach(function (elem) {
+      hpMp.forEach((elem) => {
         elem.classList.add('expanded')
       })
     }, 3000)
 
   }
 
-  // TODO this can probably be a of some description too
-  typeTextAndTalk = function (text, el, start, img, fast) {
-    // doc please!!
-    if (!img) {
-      createEl(document.body, 'span', 'img-ting', '', '')
-      img = getEID('img-ting') // create blank span if there's no image.
-    }
-    var imgSwap = (img.getAttribute('data-swap-img')) ? img.getAttribute('data-swap-img') : img.getAttribute('src'), // get image url to swap to from swap-img attr, in this case gif of me talking.
-      imgOrig = (img.getAttribute('data-orig-img')) ? img.getAttribute('data-orig-img') : img.getAttribute('src'), // get image url of original image, gif of me not talking.
-
-      i = (start) ? start : 0, // set counter for what part of the string to begin from
-      currentText = text.substr(0, i) // set currentText as substring of text argument
-
-    if (currentText.charAt(currentText.length - 1) == '<') {
-      i++
-      currentText = text.substr(0, i)
-      fast = true
-    }
-
-    if (currentText.charAt(currentText.length - 1) == '>') {
-      fast = false
-    }
-
-    var speedFactor = fast ? 0 : 1
-    let delta
-    if ((currentText.charAt(currentText.length - 1) == '.' || currentText.charAt(currentText.length - 1) == ',')) {
-      // if the last character typed was '.' or ',' take a breather
-      delta = 600 * speedFactor
-      if (img.getAttribute('src') != imgOrig) {
-        img.src = imgOrig // swap image to original image
-      } // en if src = original image
-    } else {
-      delta = 50 * speedFactor // delay is 50ms
-      if (img.getAttribute('src') != imgSwap) {
-        // if img is not imgSwap set img to imgSwap
-        // use .getAttribute() instead of .src as .src returns whole url not just attribute / filename
-        img.src = imgSwap
-      }
-    }
-
-    if (currentText.length == text.length) {
-      if (img) {
-        el.innerHTML = text
-        img.src = imgOrig // switch back to original image
-        return
-      }
-    } else {
-      el.innerHTML = currentText // update element's html to currentText and increase character
-      i++
-      setTimeout(() => {
-        this.typeTextAndTalk(text, el, i, img, fast) // recursive call of function
-      }, delta)
-    }
-  }
-
   // TODO make this a class on it's todd
   // and bind it to the dom elements
-  myConsole = function () {
+  myConsole = () => {
     // assign elements
     var myConsoleInput = getEID('myConsole-input'),
       promptInput = getEID('myConsole-prompt'),
       myConsole = getEID('myConsole'),
 
-      newLine = function (outputString, isCommand, isLastInSeries) {
+      newLine = (outputString, isCommand, isLastInSeries) => {
         // function to insert new line with content at the end of the console.
         var newPrompt = isCommand ? '~/les/cv/skills usr$:\ ' : ''
         // usr name and prompt, if a command has been entered, 'converts' the prompt
         // and entry div into a single new line
-        createEl(myConsole, 'pre', null, 'myConsole-line', newPrompt + outputString)
+        createElement({
+          parent: myConsole,
+          type: 'pre',
+          id: null,
+          classes: 'myConsole-line',
+          content: newPrompt + outputString,
+        })
+
         // create new console line
         if (isLastInSeries) {
           // if it's the last line
           myConsole.removeChild(promptInput)
           myConsole.removeChild(myConsoleInput)
           // delete old prompt and input and create and append new ones
-          createEl(myConsole, 'pre', 'myConsole-prompt', 'myConsole-line usr', '~/les/cv/skills usr$:\ ')
-          createEl(myConsole, 'div', 'myConsole-input', '', '')
+          createElement({
+            parent: myConsole, 
+            type: 'pre', 
+            id: 'myConsole-prompt', 
+            classes: 'myConsole-line usr', 
+            content: '~/les/cv/skills usr$:\ ',
+          })
+
+          createElement({
+            parent: myConsole,
+            type: 'div',
+            id: 'myConsole-input',
+            classes: '',
+            content: '',
+          })
 
           // timeout just incase we aren't done yet
-          setTimeout(function () {
+          setTimeout(() => {
             getEID('myConsole-input').setAttribute('contenteditable', true)
             myConsoleInput = getEID('myConsole-input')
             promptInput = getEID('myConsole-prompt')
@@ -507,7 +465,7 @@ export default class CV {
 
       },
 
-      processCommand = function (command) {
+      processCommand = (command) => {
         // reads in command from input div (easier to style)
 
         command = command.split('<')[0]
@@ -542,7 +500,7 @@ export default class CV {
                 skillArray.push(this.devSkills[skill].skillName)
               }
 
-              skillArray.forEach(function (element, index) {
+              skillArray.forEach((element, index) => {
                 if (element.length < 5) {
                   stringSeperator = '\t\t'
                 } else {
@@ -624,7 +582,7 @@ export default class CV {
     // add listener for hitting return
     // keypress event is deprecated apparently although
     // i can't find a decent alternative
-    window.addEventListener('keypress', function (event) {
+    window.addEventListener('keypress', (event) => {
       if (event.keyCode == 13) {
         var command = myConsoleInput.innerHTML
         processCommand(command, true)
@@ -640,31 +598,31 @@ export default class CV {
       phone = document.getElementById('phone'),
       designWrapper = document.getElementById('design-wrapper')
 
-    this.doStuffWhenActive = function () {
+    this.doStuffWhenActive = () => {
       // remove event listener so to avoid double tap
       // sort out your this and this's, Les !!!
       this.removeEventListener('click', phonethis.doStuffWhenActive)
 
       phone.classList.remove('inactive')
       icon.classList.add('micro')
-      setTimeout(function () {
+      setTimeout(() => {
         icon.src = icon.dataset.swapImg
         icon.classList.remove('micro')
         icon.classList.remove('tadaa')
-        icon.addEventListener('click', function () {
+        icon.addEventListener('click', () => {
           designWrapper.classList.add('micro')
           this.slideTo('layout')
         })
       }, 500)
     }, // end 
 
-      // init method.
-      this.init = function () {
-        icon.addEventListener('click', phonethis.doStuffWhenActive)
-      } //  end init
+    // init method.
+    this.init = () => {
+      icon.addEventListener('click', phonethis.doStuffWhenActive)
+    } //  end init
   }
 
-  wheecher = function () {
+  wheecher = () => {
     // this method selects the parent element "#wheecher" and it's children ".to-learn-item"
     // and sequentially adds a css animation class to animate the to-learn-items in and out
     // recursively calling itself to change the timeout on each call so this the last element
@@ -678,8 +636,8 @@ export default class CV {
       thisOne = 0,
       delta
 
-    var wordWheecher = function () {
-      window.setTimeout(function () {
+    var wordWheecher = () => {
+      window.setTimeout(() => {
 
         var current, next
 
@@ -734,7 +692,7 @@ export default class CV {
 
   // TODO set up express app for the endpoint of this fetch request
   // or remove it entirely
-  phoneHome = function (whoYouGonnaCall) {
+  phoneHome = (whoYouGonnaCall) => {
     // create new xhr, duh
     var xhr = new XMLHttpRequest()
 
@@ -747,5 +705,6 @@ export default class CV {
 
 // create new instance of cv
 
-const cv = new CV('fanduel')
+const cv = new CV()
 
+cv.init('fanduel')
