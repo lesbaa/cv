@@ -43,13 +43,9 @@ export const createElement = ({
       arrayName.push(el)
     } // end if arrayName
   } else {
-    return
+    return el
   }
 }
-
-export const getEID = (id) => document.getElementById(id)
-
-export const getEBC = (className) => document.getElementsByClassName(className)
 
 export const setPos = (xValue, yValue, element) => {
   // sets x and y coords for absolutely positioned elements
@@ -66,4 +62,15 @@ export const setPos = (xValue, yValue, element) => {
   } else {
     element.style.top = yValue
   }
+}
+
+export const getCharacterClass = () => {
+  const rand = Math.round(Math.random() * 2)
+  const choices = [
+    'Level 19 Renegade Bounty Hunter',
+    'Level 20 Dwarven Code-smith',
+    'Level 18 Wise-cracking Code Smuggler',
+  ]
+
+  return choices[rand]
 }
