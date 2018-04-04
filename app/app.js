@@ -11,9 +11,8 @@ import suchStuff from './assets/suchStuff'
 import parseJsonToMarkup from './modules/parseJsonToMarkup'
 import {
   createElement,
-  getEBC,
-  getEID,
   setPos,
+  getCharacterClass,
 } from './modules/helpers'
 import typeTextAndTalk from './modules/typer'
 
@@ -36,7 +35,15 @@ export default class CV {
   styles = styles
   currentSlide = 0
   state = {
-        
+    hp: 75,
+    mp: 75,
+  }
+
+  setState = (update) => {
+    this.state = {
+      ...this.state,
+      ...update,
+    }
   }
 
   init(whoIsCalling) {
@@ -64,6 +71,7 @@ export default class CV {
 
     parseJsonToMarkup(this.markup.nextPrev, document.body)
     parseJsonToMarkup(this.markup.loading, document.body)
+
     createElement({
       parent: document.body, 
       type: 'section', 
@@ -71,11 +79,11 @@ export default class CV {
       classes: 'blank-wrapper',
     })
 
-    getEID('next').addEventListener('click', () => {
+    document.querySelector('#next').addEventListener('click', () => {
       this.slideTo(this.slides.slideNames[this.slides.currentSlide + 1])
     })
 
-    getEID('prev').addEventListener('click', () => {
+    document.querySelector('#prev').addEventListener('click', () => {
       this.slideTo(this.slides.slideNames[this.slides.currentSlide - 1])
     })
 
@@ -109,46 +117,39 @@ export default class CV {
 
   me = {
     Name: 'Les Moffat',
-    characterClass: () => {
-      const rand = Math.round(Math.random() * 2)
-      const choices = [
-        'Level 19 Renegade Bounty Hunter',
-        'Level 20 Dwarven Code-smith',
-        'Level 18 Wise-cracking Code Smuggler',
-      ]
-
-      return choices[rand]
-    },
     // health and mana points
-    hp: 75,
-    mp: 75,
   }
 
   tasks = {
     intro: () => {
-      this.me.mp = 57
-      this.me.hp = 53
+      this.setState({
+        mp: 57,
+        hp: 53,
+      })
       setTimeout(() => {
         typeTextAndTalk({
           text: this.blurbs.intro,
-          el: getEID('intro-blurb'),
+          el: document.querySelector('#intro-blurb'),
           startAt: 0,
-          img: getEID('me-img'),
+          img: document.querySelector('#me-img'),
           fast: false,
         })
       }, 3000)
       this.removeBlink()
     },
     overview: () => {
-      this.me.mp = 68
-      this.me.hp = 57
+      this.setState({
+        mp: 68,
+        hp: 57,
+        characterClass: getCharacterClass(),
+      })
       this.setCharClass()
       setTimeout(() => {
         typeTextAndTalk({
           text: this.blurbs.overview,
-          el: getEID('overview-blurb'),
+          el: document.querySelector('#overview-blurb'),
           startAt: 0,
-          img: getEID('me-img'),
+          img: document.querySelector('#me-img'),
           fast: false,
         })
         this.drawOverviewSkills()
@@ -156,25 +157,28 @@ export default class CV {
       this.removeBlink()
     },
     devSkills: () => {
-      this.me.mp = 72
-      this.me.hp = 62
+      this.setState({
+        mp: 72,
+        hp: 62,
+      })
       setTimeout(() => {
         this.myConsole()
       }, 3000)
     },
     mobile: () => {
-      youPhoneEum = new this.phoneStuff(this.cvImages) // this doesn't need to be a constructor, refactor!
-      youPhoneEum.init()
+      this.phoneStuff()
     },
     layout: () => {
-      this.me.mp = 79
-      this.me.hp = 74
+      this.setState({
+        mp: 79,
+        hp: 74,
+      })
       setTimeout(() => {
         typeTextAndTalk({
           text: this.blurbs.layout,
-          el: getEID('layout-blurb'),
+          el: document.querySelector('#layout-blurb'),
           startAt: 0,
-          img: getEID('me-img'),
+          img: document.querySelector('#me-img'),
           fast: false,
         })
       }, 3000)
@@ -187,10 +191,10 @@ export default class CV {
       setTimeout(() => {
         typeTextAndTalk({
           text: this.blurbs.illus,
-          el: getEID('illus-blurb'),
+          el: document.querySelector('#illus-blurb'),
           startAt: 0,
-          img: getEID('me-img'),
-          fast: false
+          img: document.querySelector('#me-img'),
+          fast: false,
         })
       }, 3000)
     },
@@ -198,30 +202,34 @@ export default class CV {
       this.wheecher()
     },
     general: () => {
-      this.me.mp = 84
-      this.me.hp = 86
+      this.setState({
+        mp: 84,
+        hp: 86,
+      })
       setTimeout(() => {
         typeTextAndTalk({
           text: this.blurbs.suchStuff,
-          el: getEID('such-blurb'),
+          el: document.querySelector('#such-blurb'),
           startAt: 0,
-          img: getEID('me-img'),
-          fast: false
+          img: document.querySelector('#me-img'),
+          fast: false,
         })
         this.suchStuff()
       }, 3000)
       this.removeBlink()
     },
     sumUp: () => {
-      this.me.mp = 100
-      this.me.hp = 100
+      this.setState({
+        mp: 100,
+        hp: 100,
+      })
       setTimeout(() => {
         typeTextAndTalk({
           text: this.blurbs.sumUp,
-          el: getEID('sum-up-blurb'),
+          el: document.querySelector('#sum-up-blurb'),
           startAt: 0,
-          img: getEID('me-img'),
-          fast: false
+          img: document.querySelector('#me-img'),
+          fast: false,
         })
       }, 2000)
       this.removeBlink()
@@ -238,22 +246,22 @@ export default class CV {
     for (var thing in this.suchStuffStuff) {
       
       createElement({
-        parent: getEID('such-stuff-stuff'),
+        parent: document.querySelector('#such-stuff-stuff'),
         type: 'div',
         id: thing.replace(/ /g, '-'),
         classes: 'such-stuff',
         content: thing,
       })
 
-      var element = getEID(thing.replace(/ /g, '-'))
+      var element = document.querySelector(`#${thing.replace(/ /g, '-')}`)
       setPos(this.suchStuffStuff[thing].x, this.suchStuffStuff[thing].y, element)
       element.style.fontSize = this.suchStuffStuff[thing].fontSize
       element.style.color = this.suchStuffStuff[thing].color
       element.style.webkitTransitionDelay = element.style.transitionDelay = element.style.mozTransitionDelay = element.msTransitionDelay = i * 0.5 + 's'
       i++
     } // for thing in cv.suchStuff
-    setTimeout((el, ind) => {
-      getEBC('such-stuff').forEach((elem, index) => {
+    setTimeout((el) => {
+      document.querySelectorAll('.such-stuff').forEach((elem) => {
         elem.classList.add('such-expanded')
       })
     }, 1000)
@@ -265,7 +273,7 @@ export default class CV {
 
     // there will only be one section present on the page at a time so..
     let thisSection = document.querySelector('section')
-    const loading = getEID('loading')
+    const loading = document.querySelector('#loading')
 
     // if we're going forwards then add out-of-view-left class else out-of-view-right class
     const directionClass = (this.slides.slideNames.indexOf(slide) - this.slides.currentSlide > 0) ? 'out-of-view-left' : 'out-of-view-right'
@@ -303,59 +311,63 @@ export default class CV {
   }
 
   setCharClass = () => {
-    getEID('char-class').innerHTML = this.me.characterClass()
+    document.querySelector('#char-class').innerHTML = this.state.characterClass
   }
 
   drawOverviewSkills = () => {
-    var totalSkills = Object.keys(this.overviewSkills).length, // get total number of skills
-      skillsList = Object.getOwnPropertyNames(this.overviewSkills), // get names of skills
-      skills = [], // create blank array to push new elements to.
-      i = 0
+    const skillsList = Object.entries(this.overviewSkills)
+    const totalSkills = skillsList.length // get total number of skills
     // iterate through values and keys of devSkills and create div element
 
-    for (var skillValue in this.overviewSkills) {
-
-      createElement({
-        parent: getEID('skills-list'),
+    const skills = skillsList.map((
+      [
+        skillName,
+        skillValue,
+      ],
+      index
+    ) => {
+      const skillBar = createElement({
+        parent: document.querySelector('#skills-list'),
         type: 'div',
         id: undefined,
         classes: 'overview--skills-list--skill',
         content: '',
-        pushToArray: true,
-        arrayName: skills,
       })
       // create elements and push to skills array
-
-      skills[i].setInlineSize(this.overviewSkills[skillValue] / 3 + 'vw', (winHeight / totalSkills) + 1 + 'px')
+      const inlineWidth = skillValue / 3 + 'vw'
+      const inlineHeight = (winHeight / totalSkills) + 1 + 'px'
+      
+      skillBar.setInlineSize(inlineWidth, inlineHeight)
       // set sizes of elements, width to skillpercentage / 3, making 100% 33vw, height 100vh / however many skills there are.
-      i++
-    }
+      // return skillBar
+
+      const colourSpread = 183 - 78
+      const colourOffset = 78
+      skillBar.style.backgroundColor = 'hsl(' + ((colourSpread / totalSkills) * index + colourOffset) + ' ,55% ,49% )'
+      // change colour for 'rainbow'
+      const timer = (totalSkills >= 10) ? 1 + (index / totalSkills) + 's' : '0.' + index + 's'
+      // if < 10 skills make time offset 0.index, if not then offset = current index / totalSkills
+
+      skillBar.style.webkitTransitionDelay = skillBar.style.transitionDelay = skillBar.style.mozTransitionDelay = skillBar.msTransitionDelay = timer
+      // set delay on transition so skills load in sequence
+
+      // set delay on transition so skills load in sequence but 1s after bars
+      
+      const skillText = document.createElement('div')
+      const text = document.createTextNode(skillName)
+      
+      skillText.classList.add('overview--skills-list--skill--skill-text')
+      skillText.style.webkitAnimationDelay = skillText.style.msAnimationDelay = skillText.style.mozAnimationDelay = skillText.style.animationDelay = timer
+      skillText.appendChild(text)
+      
+      
+      skillBar.appendChild(skillText)
+      
+      return skillBar
+    })
 
     // iterate through each new element and add css for changing colour at each element
     // add skill name labels to bars.
-
-    skills.forEach(
-      (elem, index) => {
-        var colourSpread = 183 - 78
-        var colourOffset = 78
-        elem.style.backgroundColor = 'hsl(' + ((colourSpread / totalSkills) * index + colourOffset) + ' ,55% ,49% )'
-        // change colour for 'rainbow'
-        var timer = (totalSkills >= 10) ? 1 + (index / totalSkills) + 's' : '0.' + index + 's'
-        // if < 10 skills make time offset 0.index, if not then offset = current index / totalSkills
-
-        elem.style.webkitTransitionDelay = elem.style.transitionDelay = elem.style.mozTransitionDelay = elem.msTransitionDelay = timer
-        // set delay on transition so skills load in sequence
-
-        var skillText = document.createElement('div')
-        skillText.classList.add('overview--skills-list--skill--skill-text')
-        timer = (totalSkills > 10) ? (index / totalSkills + 1) + 's' : '0.' + (index + 1) + 's'
-        // set delay on transition so skills load in sequence but 1s after bars
-
-        skillText.style.webkitAnimationDelay = skillText.style.msAnimationDelay = skillText.style.mozAnimationDelay = skillText.style.animationDelay = timer
-        var text = document.createTextNode(skillsList[index])
-        skillText.appendChild(text)
-        elem.appendChild(skillText)
-      })
 
     const removeExpanded = (thisArray) => {
       thisArray.forEach((elem, ind) => {
@@ -365,11 +377,11 @@ export default class CV {
       })
     }
 
-    getEID('next').addEventListener('click', removeExpanded(skills))
-    getEID('prev').addEventListener('click', removeExpanded(skills))
+    document.querySelector('#next').addEventListener('click', () => removeExpanded(skills))
+    document.querySelector('#prev').addEventListener('click', () => removeExpanded(skills))
 
     var devTimeout = window.setTimeout(() => {
-      skills.forEach((elem, index) => {
+      skills.forEach((elem) => {
         elem.classList.add('expanded')
       })
     }, 100)
@@ -383,19 +395,19 @@ export default class CV {
     // sort this out with animation API and promises 
     // because the setTimeouts thing is getting a little out of hand
 
-    var hpMp = [getEID('mp-bar'), getEID('hp-bar')]
+    const hpMp = [document.querySelector('#mp-bar'), document.querySelector('#hp-bar')]
 
     hpMp.forEach((elem) => {
-      var mpOrHp = elem.id.split('-')[0]
-      elem.style.width = this.me[mpOrHp] + 'px'
-      elem.style.borderRightWidth = 100 - this.me[mpOrHp] + 'px'
+      const mpOrHp = elem.id.split('-')[0]
+      elem.style.width = this.state[mpOrHp] + 'px'
+      elem.style.borderRightWidth = 100 - this.state[mpOrHp] + 'px'
     })
 
     // I could do with removing some of these setTimeouts
     setTimeout(() => {
       // ANOTHER ONE!! sort this
       setTimeout(() => {
-        getEBC('hp-mp-image').forEach((elem, ind) => {
+        document.querySelectorAll('.hp-mp-image').forEach((elem, ind) => {
           // energy level is the width as a number primitive, get width, remove 'px' and parse to number
           var energyLevel = parseInt(elem.style.width.split('px')[0])
           // if each bar is past a certain amount, remove the blink class w/animation
@@ -415,13 +427,13 @@ export default class CV {
   // and bind it to the dom elements
   myConsole = () => {
     // assign elements
-    var myConsoleInput = getEID('myConsole-input'),
-      promptInput = getEID('myConsole-prompt'),
-      myConsole = getEID('myConsole'),
+    let myConsoleInput = document.querySelector('#myConsole-input')
+    let promptInput = document.querySelector('#myConsole-prompt')
+    const myConsole = document.querySelector('#myConsole')
 
-      newLine = (outputString, isCommand, isLastInSeries) => {
+    const newLine = (outputString, isCommand, isLastInSeries) => {
         // function to insert new line with content at the end of the console.
-        var newPrompt = isCommand ? '~/les/cv/skills usr$:\ ' : ''
+        const newPrompt = isCommand ? '~/les/cv/skills usr$: ' : ''
         // usr name and prompt, if a command has been entered, 'converts' the prompt
         // and entry div into a single new line
         createElement({
@@ -438,15 +450,15 @@ export default class CV {
           myConsole.removeChild(promptInput)
           myConsole.removeChild(myConsoleInput)
           // delete old prompt and input and create and append new ones
-          createElement({
+          promptInput = createElement({
             parent: myConsole, 
             type: 'pre', 
             id: 'myConsole-prompt', 
             classes: 'myConsole-line usr', 
-            content: '~/les/cv/skills usr$:\ ',
+            content: '~/les/cv/skills usr$: ',
           })
 
-          createElement({
+          myConsoleInput = createElement({
             parent: myConsole,
             type: 'div',
             id: 'myConsole-input',
@@ -456,51 +468,47 @@ export default class CV {
 
           // timeout just incase we aren't done yet
           setTimeout(() => {
-            getEID('myConsole-input').setAttribute('contenteditable', true)
-            myConsoleInput = getEID('myConsole-input')
-            promptInput = getEID('myConsole-prompt')
+            myConsoleInput.setAttribute('contenteditable', true)
             myConsoleInput.focus()
           }, 200)
         }
 
       },
 
-      processCommand = (command) => {
-        // reads in command from input div (easier to style)
-
-        command = command.split('<')[0]
+      processCommand = (input) => {
+        const commandAndFlag = input.split('<')[0]
         // firefox and it's weird addition of line breaks
-        // maybe look at fixing this properly instead of hacking it
 
-        command = command.split(' ')
-        // split command and argument / flag apart
-        switch (command[0]) {
-          case 'help':
+        const [
+          command,
+          flag,
+        ] = commandAndFlag.split(' ')
+
+        switch (command) {
+          case 'help': {
             // show help
-            newLine(command.join(' '), true)
+            newLine(commandAndFlag, true)
             newLine(' ')
             newLine('ls -a \t\t-\t list all skills')
             newLine('showme [skill] \t-\t view details')
             newLine('next \t\t-\t next slide')
             newLine(' ', false, true)
             break
+          }
 
-          case 'ls':
+          case 'ls': {
             // list command
-            if (command[1] == '-a') {
-              // if
-              var skillArray = [],
-                skillString = '',
-                stringSeperator
-
-              newLine(command.join(' '), true)
+            if (flag === '-a') {
+              newLine(commandAndFlag, true)
               newLine(' ')
 
-              for (var skill in this.devSkills) {
-                skillArray.push(this.devSkills[skill].skillName)
-              }
+              const skillArray = Object.values(this.devSkills)
+                .map(({ skillName }) => skillName)
 
-              skillArray.forEach((element, index) => {
+              let stringSeperator
+              let skillString = ''
+
+              skillArray.forEach((element) => {
                 if (element.length < 5) {
                   stringSeperator = '\t\t'
                 } else {
@@ -513,42 +521,36 @@ export default class CV {
               newLine(' ', false, true)
 
             } else {
-              newLine(command.join(' '), true)
-              newLine('"' + command[1] + '": invalid flag / argument')
+              newLine(commandAndFlag, true)
+              newLine('"' + flag + '": invalid flag / argument')
               newLine(' ', false, true)
             }
 
             break
-
-          case 'next':
+          }
+          case 'next': {
             this.slideTo('mobile')
             break
+          }
 
-          case 'showme':
-            // display skill blurb if command is showme [skill]
-            newLine(command.join(' '), true)
+          case 'showme': {
+            const [{
+              skillName: name,
+              blurb,
+              level,
+              learnNext,
+            }] = Object.values(this.devSkills)
+              .filter(({ skillName }) => skillName === flag)
+
+            newLine(commandAndFlag, true)
             newLine(' ')
-            var name, blurb, level, learnNext, underline = ''
-            for (var devSkill in this.devSkills) {
-              // iterate through skills and match
-              // is there a 'filter' type method?
-              if (this.devSkills[devSkill].skillName == command[1]) {
-                name = this.devSkills[devSkill].skillName
-                blurb = this.devSkills[devSkill].blurb
-                level = this.devSkills[devSkill].level
-                learnNext = this.devSkills[devSkill].learnNext
-              }
-            }
-            // new line for the skill name
 
             if (name) {
               newLine(name)
-              for (var i = name.length - 1; i >= 0; i--) {
-                underline = underline.concat('*')
-                // for the length in chars of the name underline
-                // with ****
-              }
-              // print out the rest of the blurb
+              const underline = name.split('')
+                .map(() => '*')
+                .join('')
+
               newLine(underline)
               newLine('Level : ' + level)
               newLine(blurb)
@@ -563,12 +565,14 @@ export default class CV {
               newLine('Whoa! Calm down! I haven\'t quite got to learning this yet!', false, true)
             }
             break
+          }
 
-          default:
+          default: {
             // if what's entered doesn't fit any of the above...
-            newLine(command.join(' '), true)
-            newLine('"' + command[0] + '"' + ' command not found!', false, true)
+            newLine(commandAndFlag, true)
+            newLine('"' + command + '"' + ' command not found!', false, true)
             break
+          }
         }
 
         // could probably make this a little more functional.
@@ -579,29 +583,24 @@ export default class CV {
     myConsoleInput.setAttribute('contenteditable', 'true')
     myConsoleInput.focus()
 
-    // add listener for hitting return
-    // keypress event is deprecated apparently although
-    // i can't find a decent alternative
     window.addEventListener('keypress', (event) => {
       if (event.keyCode == 13) {
-        var command = myConsoleInput.innerHTML
-        processCommand(command, true)
+        processCommand(myConsoleInput.innerHTML, true)
       }
     })
   } // end my console
 
   // TODO turn this into a class or make it functional
-  phoneStuff = function (cvImages) {
-    var phonethis = this,
-      img = document.getElementById('phone-image'),
-      icon = document.getElementById('message-icon'),
-      phone = document.getElementById('phone'),
-      designWrapper = document.getElementById('design-wrapper')
+  phoneStuff = () => {
 
-    this.doStuffWhenActive = () => {
+    const icon = document.querySelector('#message-icon')
+    const phone = document.querySelector('#phone')
+    const designWrapper = document.querySelector('#design-wrapper')
+
+    const doStuffWhenActive = () => {
       // remove event listener so to avoid double tap
       // sort out your this and this's, Les !!!
-      this.removeEventListener('click', phonethis.doStuffWhenActive)
+      icon.removeEventListener('click', doStuffWhenActive)
 
       phone.classList.remove('inactive')
       icon.classList.add('micro')
@@ -614,12 +613,9 @@ export default class CV {
           this.slideTo('layout')
         })
       }, 500)
-    }, // end 
+    } // end 
 
-    // init method.
-    this.init = () => {
-      icon.addEventListener('click', phonethis.doStuffWhenActive)
-    } //  end init
+    icon.addEventListener('click', doStuffWhenActive)
   }
 
   wheecher = () => {
