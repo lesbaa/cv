@@ -9,6 +9,7 @@ import slides from './assets/slides'
 import styles from './assets/styles'
 import suchStuff from './assets/suchStuff'
 import parseJsonToMarkup from './modules/parseJsonToMarkup'
+import  './assets/styles.css'
 import {
   createElement,
   setPos,
@@ -36,7 +37,7 @@ export default class CV {
   state = {
     hp: 75,
     mp: 75,
-    currentSlide: 0,
+    currentSlide: 1,
   }
 
   setState = (update) => {
@@ -94,13 +95,16 @@ export default class CV {
       document.body.style.opacity = '1'
       setTimeout(() => {
         this.slideTo(initSlide)
-      }, 500)
+      }, 100)
     })
 
-    // so this navigation in the broswer calls the slideTo function w/animation rather than jumpy 
-    // view change.
     window.addEventListener('popstate', () => {
-      this.slideTo(location.hash.split('#')[1])
+      const currentSlideNum = this.state.currentSlide
+      const currentSlideName = this.slides.slideNames[currentSlideNum]
+      const slideNameFromHash = location.hash.split('#')[1]
+      if (currentSlideName !== slideNameFromHash) {
+        this.slideTo(slideNameFromHash)
+      }
     })
 
     // hello
@@ -287,6 +291,7 @@ export default class CV {
   hideLoader = () => this.toggleLoader(true)
 
   renderNewSlide = (slideName, timeout = 500) => {
+    console.log(`===${slideName}===`)
     return new Promise((resolve, reject) => {
       try {
         const slideMarkup = this.markup[slideName] || this.markup['woops']
@@ -303,7 +308,7 @@ export default class CV {
     })
   }
 
-  slideInNewSlide = (timeout = 2000) => {
+  slideInNewSlide = (timeout = 3000) => {
     return new Promise((resolve, reject) => {
       const currentSlideSection = document.querySelector('.current-slide')
       currentSlideSection.classList.remove('out-of-view-right')
@@ -473,28 +478,21 @@ export default class CV {
 
     hpMp.forEach((elem) => {
       const mpOrHp = elem.id.split('-')[0]
-      elem.style.width = this.state[mpOrHp] + 'px'
+      elem.style.borderLeftWidth = this.state[mpOrHp] + 'px'
       elem.style.borderRightWidth = 100 - this.state[mpOrHp] + 'px'
     })
 
     // I could do with removing some of these setTimeouts
     setTimeout(() => {
-      // ANOTHER ONE!! sort this
-      setTimeout(() => {
-        document.querySelectorAll('.hp-mp-image').forEach((elem, ind) => {
-          // energy level is the width as a number primitive, get width, remove 'px' and parse to number
-          var energyLevel = parseInt(elem.style.width.split('px')[0])
-          // if each bar is past a certain amount, remove the blink class w/animation
-          if (energyLevel > 64) {
-            elem.classList.remove('blink')
-          }
-        })
-      }, 1500)
-      hpMp.forEach((elem) => {
-        elem.classList.add('expanded')
+      document.querySelectorAll('.hp-mp-image').forEach((elem, ind) => {
+        // energy level is the width as a number primitive, get width, remove 'px' and parse to number
+        const energyLevel = parseInt(elem.style.width.split('px')[0])
+        // if each bar is past a certain amount, remove the blink class w/animation
+        if (energyLevel > 64) {
+          elem.classList.remove('blink')
+        }
       })
-    }, 3000)
-
+    }, 1000)
   }
 
   // TODO make this a class on it's todd

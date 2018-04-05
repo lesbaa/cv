@@ -35,7 +35,7 @@ export default {
         },
         child2: {
           type: 'div',
-          classes: 'hp-bar',
+          classes: 'hp-bar power-bar',
           id: 'hp-bar',
         },
       },
@@ -53,7 +53,7 @@ export default {
         },
         child2: {
           type: 'div',
-          classes: 'mp-bar',
+          classes: 'mp-bar power-bar',
           id: 'mp-bar',
         },
       },
