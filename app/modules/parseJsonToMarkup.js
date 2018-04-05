@@ -1,44 +1,46 @@
-export default function parseJsonToMarkup (jsonInput, parentElement) {
+// TODO if no parent element return rendered element
+export default function parseJsonToMarkup (jsonInput) {
   // function to take json page data stored and insert it as html into the DOM
   for (var entry in jsonInput) {
     // for every 1st level item in the json object
-    var input = jsonInput[entry]
+    var child = jsonInput[entry]
 
-    var element = document.createElement(input.type)
-    if (input.textContent) {
-      var text = document.createTextNode(input.textContent)
+    var element = document.createElement(child.type)
+    if (child.textContent) {
+      var text = document.createTextNode(child.textContent)
       element.appendChild(text)
     }
 
     // if classes exist then add classes
 
-    if (input.classes) {
-      element.setAttribute('class', input.classes)
+    if (child.classes) {
+      element.setAttribute('class', child.classes)
     }
 
     // if there's an id add it
 
-    if (input.id) {
-      element.id = input.id
+    if (child.id) {
+      element.id = child.id
     }
 
     // if there are any custom attributes, add them
 
-    if (input.attributes) {
-      for (var attr in input.attributes) {
-        element.setAttribute(attr, input.attributes[attr])
+    if (child.attributes) {
+      for (var attr in child.attributes) {
+        element.setAttribute(attr, child.attributes[attr])
       }
     }
 
     // if there's any child nodes, recursively call the function with this branch and element
     // and append the element or just append the element.
 
-    if (input.children) {
-      parentElement.appendChild(element)
-      parseJsonToMarkup(input.children, element)
-    } else {
-      parentElement.appendChild(element)
+    if (child.children) {
+      debugger
+      const rendered = parseJsonToMarkup(child.children)
+      debugger
+      return rendered
     }
-
+    debugger
+    return element
   }
 } // end parse json to markup

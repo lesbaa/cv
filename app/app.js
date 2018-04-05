@@ -33,10 +33,10 @@ export default class CV {
   devSkills = devSkills
   suchStuffStuff = suchStuff
   styles = styles
-  currentSlide = 0
   state = {
     hp: 75,
     mp: 75,
+    currentSlide: 0,
   }
 
   setState = (update) => {
@@ -69,8 +69,8 @@ export default class CV {
       type: 'title',
     })
 
-    parseJsonToMarkup(this.markup.nextPrev, document.body)
-    parseJsonToMarkup(this.markup.loading, document.body)
+    document.body.appendChild(parseJsonToMarkup(this.markup.nextPrev))
+    document.body.appendChild(parseJsonToMarkup(this.markup.loading))
 
     createElement({
       parent: document.body, 
@@ -80,20 +80,15 @@ export default class CV {
     })
 
     document.querySelector('#next').addEventListener('click', () => {
-      this.slideTo(this.slides.slideNames[this.slides.currentSlide + 1])
+      this.slideTo(this.slides.slideNames[this.state.currentSlide + 1])
     })
 
     document.querySelector('#prev').addEventListener('click', () => {
-      this.slideTo(this.slides.slideNames[this.slides.currentSlide - 1])
+      this.slideTo(this.slides.slideNames[this.state.currentSlide - 1])
     })
 
-    const hash = location.hash.split('#')[1]
+    const initSlide = location.hash.split('#')[1]
 
-    // so this it loads from window location, if null then load intro slide
-    const initSlide = hash ? ((slides.slideNames.indexOf(hash) == -1) ? 'woops' : hash) : 'intro'
-    // reveal body, sounds pervy.
-
-    // once window has loaded, reveal body (sounds pervy), wait 500ms then slideTo first slide.
     // change to promises / loading etc
     window.addEventListener('load', () => {
       document.body.style.opacity = '1'
@@ -117,7 +112,6 @@ export default class CV {
 
   me = {
     Name: 'Les Moffat',
-    // health and mana points
   }
 
   tasks = {
@@ -126,15 +120,13 @@ export default class CV {
         mp: 57,
         hp: 53,
       })
-      setTimeout(() => {
-        typeTextAndTalk({
-          text: this.blurbs.intro,
-          el: document.querySelector('#intro-blurb'),
-          startAt: 0,
-          img: document.querySelector('#me-img'),
-          fast: false,
-        })
-      }, 3000)
+      typeTextAndTalk({
+        text: this.blurbs.intro,
+        el: document.querySelector('#intro-blurb'),
+        startAt: 0,
+        img: document.querySelector('#me-img'),
+        fast: false,
+      })
       this.removeBlink()
     },
     overview: () => {
@@ -144,16 +136,14 @@ export default class CV {
         characterClass: getCharacterClass(),
       })
       this.setCharClass()
-      setTimeout(() => {
-        typeTextAndTalk({
-          text: this.blurbs.overview,
-          el: document.querySelector('#overview-blurb'),
-          startAt: 0,
-          img: document.querySelector('#me-img'),
-          fast: false,
-        })
-        this.drawOverviewSkills()
-      }, 3000)
+      typeTextAndTalk({
+        text: this.blurbs.overview,
+        el: document.querySelector('#overview-blurb'),
+        startAt: 0,
+        img: document.querySelector('#me-img'),
+        fast: false,
+      })
+      this.drawOverviewSkills()
       this.removeBlink()
     },
     devSkills: () => {
@@ -161,9 +151,7 @@ export default class CV {
         mp: 72,
         hp: 62,
       })
-      setTimeout(() => {
-        this.myConsole()
-      }, 3000)
+      this.myConsole()
     },
     mobile: () => {
       this.phoneStuff()
@@ -173,30 +161,26 @@ export default class CV {
         mp: 79,
         hp: 74,
       })
-      setTimeout(() => {
-        typeTextAndTalk({
-          text: this.blurbs.layout,
-          el: document.querySelector('#layout-blurb'),
-          startAt: 0,
-          img: document.querySelector('#me-img'),
-          fast: false,
-        })
-      }, 3000)
+      typeTextAndTalk({
+        text: this.blurbs.layout,
+        el: document.querySelector('#layout-blurb'),
+        startAt: 0,
+        img: document.querySelector('#me-img'),
+        fast: false,
+      })
       this.removeBlink()
       document.getElementById('next-btn').addEventListener('click', () => {
         this.slideTo('illustration')
       })
     },
     illustration: () => {
-      setTimeout(() => {
-        typeTextAndTalk({
-          text: this.blurbs.illus,
-          el: document.querySelector('#illus-blurb'),
-          startAt: 0,
-          img: document.querySelector('#me-img'),
-          fast: false,
-        })
-      }, 3000)
+      typeTextAndTalk({
+        text: this.blurbs.illus,
+        el: document.querySelector('#illus-blurb'),
+        startAt: 0,
+        img: document.querySelector('#me-img'),
+        fast: false,
+      })
     },
     learning: () => {
       this.wheecher()
@@ -206,16 +190,14 @@ export default class CV {
         mp: 84,
         hp: 86,
       })
-      setTimeout(() => {
-        typeTextAndTalk({
-          text: this.blurbs.suchStuff,
-          el: document.querySelector('#such-blurb'),
-          startAt: 0,
-          img: document.querySelector('#me-img'),
-          fast: false,
-        })
-        this.suchStuff()
-      }, 3000)
+      typeTextAndTalk({
+        text: this.blurbs.suchStuff,
+        el: document.querySelector('#such-blurb'),
+        startAt: 0,
+        img: document.querySelector('#me-img'),
+        fast: false,
+      })
+      this.suchStuff()
       this.removeBlink()
     },
     sumUp: () => {
@@ -223,15 +205,13 @@ export default class CV {
         mp: 100,
         hp: 100,
       })
-      setTimeout(() => {
-        typeTextAndTalk({
-          text: this.blurbs.sumUp,
-          el: document.querySelector('#sum-up-blurb'),
-          startAt: 0,
-          img: document.querySelector('#me-img'),
-          fast: false,
-        })
-      }, 2000)
+      typeTextAndTalk({
+        text: this.blurbs.sumUp,
+        el: document.querySelector('#sum-up-blurb'),
+        startAt: 0,
+        img: document.querySelector('#me-img'),
+        fast: false,
+      })
       this.removeBlink()
     },
     woops: () => {
@@ -267,47 +247,134 @@ export default class CV {
     }, 1000)
   }
 
-  slideTo = (slide) => {
+  slideOutCurrentSlide = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentSlideElement = document.querySelector('.current-slide')
+        if (currentSlideElement) {
+          currentSlideElement.classList.remove('current-slide')
+          currentSlideElement.classList.add('out-of-view-left')
+        }
+        setTimeout(() => {
+          resolve()
+        }, 1000)
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
+  toggleLoader = (hide, timeout = 1000) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const loading = document.querySelector('#loading')
+        setTimeout(() => {
+          if (hide) {
+            loading.classList.add('not-loading')
+            resolve()
+          } else {
+            loading.classList.remove('not-loading')
+            resolve()
+          }
+        }, timeout)
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
+  showLoader = () => this.toggleLoader(false)
+  hideLoader = () => this.toggleLoader(true)
+
+  renderNewSlide = (slideName, timeout = 500) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const slideMarkup = this.markup[slideName] || this.markup['woops']
+        debugger
+        const newSlideSection = parseJsonToMarkup(slideMarkup)
+        debugger
+        
+        newSlideSection.classList.add('current-slide')
+        
+        document.body.appendChild(newSlideSection)
+        setTimeout(() => {
+          resolve()
+        }, timeout)
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
+  slideInNewSlide = (timeout = 2000) => {
+    return new Promise((resolve, reject) => {
+      const currentSlideSection = document.querySelector('.current-slide')
+      currentSlideSection.classList.remove('out-of-view-right')
+      if (!currentSlideSection) reject('no current slide to slide in!')
+      setTimeout(() => {
+        resolve()
+      }, timeout)
+    })
+  }
+
+  runTasks = (slideName) => {
+    return new Promise((resolve, reject) => {
+      this.tasks[slideName]()
+    })
+  }
+
+  deletePreviousSlide = () => {
+    return new Promise((resolve, reject) => {
+      const previousSlide = document.querySelector('.out-of-view-left')
+      if (!previousSlide) reject('no previous slide to delete')
+      previousSlide.parentNode.removeChild(previousSlide)
+    })
+  }
+
+  updatePageTitle = (slideName) => {
+    return new Promise((resolve, reject) => {
+      try {
+        document.querySelector('title').textContent = this.slides.titles[slideName]
+        location.hash = slideName
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
+  slideTo = (slideName = 'intro') => {
+
+    // if there is an active slide, slide it out - 
+    // slide in loading image, wait - 
+    // parse in markup for correct slide
+    // delete old slide 
+    // slide in new slide
+    // update hash and title
+    // run tasks for that slide
+
     // if the slide is undefined go back to beginning
-    if (!slide) { slide = 'intro' }
 
-    // there will only be one section present on the page at a time so..
-    let thisSection = document.querySelector('section')
-    const loading = document.querySelector('#loading')
-
-    // if we're going forwards then add out-of-view-left class else out-of-view-right class
-    const directionClass = (this.slides.slideNames.indexOf(slide) - this.slides.currentSlide > 0) ? 'out-of-view-left' : 'out-of-view-right'
-
-    // set current slide to index of the slide with this name
-    this.slides.currentSlide = this.slides.slideNames.indexOf(slide)
-
-    // change title and hash
-    document.querySelector('title').textContent = this.slides.titles[slide]
-    location.hash = slide
-
-    if (!thisSection.classList.contains(directionClass)) {
-      thisSection.classList.add(directionClass)
-      loading.classList.remove('not-loading')
-    }
-    // timeout for after animation is finished
-    // remove current section and parse new section
-
-    // this could all probably be done more elegantly done with web anim API and / or ES5 promises but...
-    // I don't have the time at the mo.  Will refactor to include this.
-    setTimeout(() => {
-      document.body.removeChild(thisSection)
-      setTimeout(() => {
-        loading.classList.add('not-loading')
-      }, 1000)
-      parseJsonToMarkup(this.markup[slide], document.body)
-      thisSection = document.querySelector('section')
-
-      this.tasks[slide].call(this)
-
-      setTimeout(() => {
-        thisSection.classList.remove('out-of-view-right')
-      }, 2000)
-    }, 500)
+    Promise.all([
+      this.slideOutCurrentSlide(),
+      this.showLoader(),
+    ])
+      .then(() => {
+        return this.renderNewSlide(slideName)
+      })
+      .then(() => {
+        return this.deletePreviousSlide()
+      })
+      .then(() => {
+        return this.slideInNewSlide()
+      })
+      .then(() => {
+        return this.updatePageTitle(slideName)
+      })
+      .then(() => {
+        return this.runtasks(slideName)
+      })
+      .catch(e => console.error('Error in promise chain', e))
   }
 
   setCharClass = () => {
@@ -380,7 +447,7 @@ export default class CV {
     document.querySelector('#next').addEventListener('click', () => removeExpanded(skills))
     document.querySelector('#prev').addEventListener('click', () => removeExpanded(skills))
 
-    var devTimeout = window.setTimeout(() => {
+    const devTimeout = window.setTimeout(() => {
       skills.forEach((elem) => {
         elem.classList.add('expanded')
       })

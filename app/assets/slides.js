@@ -1,4 +1,4 @@
-// TODO find out where this is used and Object.entries it
+// this shouldn't have an array and an object
 export default {
   slideNames: [
     'woops',
