@@ -72,12 +72,12 @@ export default class CV {
     document.body.appendChild(parseJsonToMarkup(this.markup.nextPrev))
     document.body.appendChild(parseJsonToMarkup(this.markup.loading))
 
-    createElement({
-      parent: document.body, 
-      type: 'section', 
-      id: null, 
-      classes: 'blank-wrapper',
-    })
+    // createElement({
+    //   parent: document.body, 
+    //   type: 'section', 
+    //   id: null, 
+    //   classes: 'blank-wrapper',
+    // })
 
     document.querySelector('#next').addEventListener('click', () => {
       this.slideTo(this.slides.slideNames[this.state.currentSlide + 1])
@@ -290,10 +290,7 @@ export default class CV {
     return new Promise((resolve, reject) => {
       try {
         const slideMarkup = this.markup[slideName] || this.markup['woops']
-        debugger
         const newSlideSection = parseJsonToMarkup(slideMarkup)
-        debugger
-        
         newSlideSection.classList.add('current-slide')
         
         document.body.appendChild(newSlideSection)
@@ -326,8 +323,10 @@ export default class CV {
   deletePreviousSlide = () => {
     return new Promise((resolve, reject) => {
       const previousSlide = document.querySelector('.out-of-view-left')
-      if (!previousSlide) reject('no previous slide to delete')
-      previousSlide.parentNode.removeChild(previousSlide)
+      if (previousSlide) {
+        previousSlide.parentNode.removeChild(previousSlide)
+      }
+      resolve()
     })
   }
 
@@ -360,19 +359,27 @@ export default class CV {
       this.showLoader(),
     ])
       .then(() => {
+        console.log('renderNewSlide')
         return this.renderNewSlide(slideName)
       })
       .then(() => {
+        console.log('deletePreviousSlide')
         return this.deletePreviousSlide()
       })
       .then(() => {
+        return this.hideLoader()
+      })
+      .then(() => {
+        console.log('slideInNewSlide')
         return this.slideInNewSlide()
       })
       .then(() => {
+        console.log('updatePageTitle')
         return this.updatePageTitle(slideName)
       })
       .then(() => {
-        return this.runtasks(slideName)
+        console.log('runtasks')
+        return this.runTasks(slideName)
       })
       .catch(e => console.error('Error in promise chain', e))
   }
